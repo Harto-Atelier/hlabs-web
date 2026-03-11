@@ -159,12 +159,19 @@
             .hero-foot p{max-width:100%;font-size:.7rem}
             .hero-foot .clk{font-size:.5rem}
 
-            /* Horizontal scroll services */
-            .hs-panel{padding:0 24px}
-            .svc-n{top:80px;left:24px}
-            .svc-t{font-size:clamp(2.5rem,10vw,4rem)!important;letter-spacing:-1px!important}
+            /* Horizontal scroll: convert to vertical on mobile */
+            .hs-wrap{height:auto!important}
+            .hs-stick{position:relative!important;height:auto!important;flex-direction:column}
+            .hs-track{flex-direction:column!important;transform:none!important}
+            .hs-panel{width:100%!important;height:auto!important;min-height:60vh;padding:60px 24px!important}
+            .hs-prog{display:none!important}
+            .svc-n{position:relative!important;top:auto!important;left:auto!important;margin-bottom:16px}
+            .svc-t{font-size:clamp(2.2rem,9vw,3.5rem)!important;letter-spacing:-1px!important}
             .svc-d{font-size:.72rem;max-width:100%}
-            .svc-ghost{font-size:50vw!important;opacity:.006}
+            .svc-ghost{display:none!important}
+            
+            /* Thicker outline on mobile */
+            .morph-line.outline{-webkit-text-stroke-width:1.5px!important}
 
             /* Scene dividers */
             .scene-divider{height:15vh}
