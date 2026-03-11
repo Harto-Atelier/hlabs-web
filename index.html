@@ -143,14 +143,63 @@
 
         /* Mobile */
         @media(max-width:768px){
-            body{cursor:auto}.cur{display:none}
-            nav{padding:16px 20px}.nv a{margin-left:16px;font-size:.55rem}
-            .hero-foot{left:20px;right:20px;bottom:20px}
-            .hs-panel{padding:0 24px}.svc-n{top:80px;left:24px}
-            .work{padding:80px 20px}.wg{grid-template-columns:1fr}
-            .man{padding:100px 20px}
-            .cta{padding:60px 20px}
-            footer{padding:16px 20px;flex-direction:column;gap:8px}
+            body{cursor:auto}
+            .cur{display:none}
+
+            /* Nav */
+            nav{padding:16px 20px}
+            .logo{font-size:.65rem;letter-spacing:3px}
+            .nv a{margin-left:14px;font-size:.5rem;letter-spacing:2px}
+
+            /* Hero */
+            .hero{padding:0 20px}
+            .morph-line{font-size:clamp(2.8rem,11vw,5rem)!important;letter-spacing:-2px!important}
+            .hero-tag{font-size:.45rem;letter-spacing:5px;margin-bottom:12px}
+            .hero-foot{left:20px;right:20px;bottom:24px;flex-direction:column;gap:16px;align-items:flex-start}
+            .hero-foot p{max-width:100%;font-size:.7rem}
+            .hero-foot .clk{font-size:.5rem}
+
+            /* Horizontal scroll services */
+            .hs-panel{padding:0 24px}
+            .svc-n{top:80px;left:24px}
+            .svc-t{font-size:clamp(2.5rem,10vw,4rem)!important;letter-spacing:-1px!important}
+            .svc-d{font-size:.72rem;max-width:100%}
+            .svc-ghost{font-size:50vw!important;opacity:.006}
+
+            /* Scene dividers */
+            .scene-divider{height:15vh}
+
+            /* Marquee */
+            .marq-t span{font-size:1.5rem!important}
+
+            /* Work grid */
+            .work{padding:80px 20px}
+            .work h2{font-size:1.8rem;margin-bottom:40px}
+            .wg{grid-template-columns:1fr;gap:12px}
+            .wi{aspect-ratio:4/3}
+            .wi .inf{transform:translateY(0)!important;opacity:1!important;
+                padding:16px 20px;background:linear-gradient(transparent 0%,rgba(5,5,5,.95) 60%)}
+
+            /* Manifesto */
+            .man{padding:80px 20px}
+            .man-t{font-size:clamp(1.3rem,5vw,2rem)!important}
+
+            /* Contact */
+            .cta{min-height:50vh;padding:60px 20px;gap:12px}
+            .cta-h{font-size:clamp(3rem,12vw,6rem)!important;letter-spacing:-3px!important}
+            .cta-l{font-size:.45rem}
+            .cta-e{font-size:.6rem}
+
+            /* Footer */
+            footer{padding:16px 20px;flex-direction:column;gap:8px;text-align:center}
+            .fl{gap:16px}
+        }
+
+        /* Small phones */
+        @media(max-width:380px){
+            .morph-line{font-size:2.5rem!important}
+            .svc-t{font-size:2rem!important}
+            .cta-h{font-size:2.5rem!important}
         }
     </style>
 </head>
