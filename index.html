@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HLABS — Creative Studio by Harto</title>
+    <meta name="description" content="HLABS is the creative technology studio by Harto. We build at the intersection of art, code, and blockchain.">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>◼</text></svg>">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg: #0a0a0a;
+            --text: #ECE0D7;
+            --muted: rgba(236,224,215,0.4);
+            --purple: #713EFD;
+            --red: #FB3100;
+            --green: #59B845;
+            --yellow: #FFD915;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(113,62,253,0.3) transparent;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            overflow-x: hidden;
+            cursor: none;
+        }
+
+        /* Custom cursor */
+        .cursor {
+            position: fixed;
+            width: 20px;
+            height: 20px;
+            border: 1.5px solid var(--purple);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 10000;
+            transition: transform 0.15s ease, opacity 0.15s ease;
+            mix-blend-mode: difference;
+        }
+        .cursor-dot {
+            position: fixed;
+            width: 4px;
+            height: 4px;
+            background: var(--text);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 10001;
+        }
+        .cursor.hover {
+            transform: scale(2.5);
+            background: rgba(113,62,253,0.1);
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 28px 48px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+            mix-blend-mode: difference;
+        }
+        .nav-logo svg {
+            height: 22px;
+            width: auto;
+        }
+        .nav-links {
+            display: flex;
+            gap: 40px;
+        }
+        .nav-links a {
+            color: var(--text);
+            text-decoration: none;
+            font-size: 0.75rem;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            font-weight: 500;
+            transition: opacity 0.3s;
+            position: relative;
+        }
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 0;
+            height: 1px;
+            background: var(--purple);
+            transition: width 0.3s ease;
+        }
+        .nav-links a:hover::after { width: 100%; }
+        .nav-links a:hover { opacity: 1; }
+
+        /* Canvas background */
+        #bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 0;
+        }
+
+        /* Sections */
+        section {
+            position: relative;
+            z-index: 1;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Hero */
+        .hero {
+            flex-direction: column;
+            gap: 24px;
+            text-align: center;
+        }
+        .hero-badge {
+            font-size: 0.65rem;
+            letter-spacing: 6px;
+            text-transform: uppercase;
+            color: var(--purple);
+            font-weight: 600;
+        }
+        .hero-title {
+            font-size: clamp(3rem, 10vw, 9rem);
+            font-weight: 700;
+            letter-spacing: -3px;
+            line-height: 0.9;
+            background: linear-gradient(135deg, var(--text) 0%, rgba(236,224,215,0.6) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .hero-sub {
+            font-size: clamp(0.9rem, 1.5vw, 1.1rem);
+            color: var(--muted);
+            max-width: 500px;
+            line-height: 1.7;
+            font-weight: 300;
+        }
+        .hero-scroll {
+            position: absolute;
+            bottom: 48px;
+            font-size: 0.65rem;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: var(--muted);
+            animation: float 2s ease-in-out infinite;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(8px); }
+        }
+
+        /* Services */
+        .services {
+            flex-direction: column;
+            padding: 120px 48px;
+            gap: 80px;
+        }
+        .section-label {
+            font-size: 0.65rem;
+            letter-spacing: 6px;
+            text-transform: uppercase;
+            color: var(--purple);
+            font-weight: 600;
+        }
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2px;
+            max-width: 1200px;
+            width: 100%;
+        }
+        .service-card {
+            padding: 60px 40px;
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.04);
+            transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        .service-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--purple);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+        }
+        .service-card:hover::before { transform: scaleX(1); }
+        .service-card:hover {
+            background: rgba(113,62,253,0.04);
+            border-color: rgba(113,62,253,0.15);
+        }
+        .service-num {
+            font-size: 0.65rem;
+            color: var(--purple);
+            letter-spacing: 2px;
+            margin-bottom: 24px;
+            font-weight: 600;
+        }
+        .service-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 16px;
+            letter-spacing: -0.5px;
+        }
+        .service-desc {
+            font-size: 0.85rem;
+            color: var(--muted);
+            line-height: 1.7;
+            font-weight: 300;
+        }
+
+        /* Work section */
+        .work {
+            flex-direction: column;
+            padding: 120px 48px;
+            gap: 80px;
+        }
+        .work-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2px;
+            max-width: 1200px;
+            width: 100%;
+        }
+        .work-item {
+            aspect-ratio: 16/10;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.04);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: flex-end;
+            padding: 32px;
+            transition: all 0.6s cubic-bezier(0.19, 1, 0.22, 1);
+        }
+        .work-item:hover {
+            border-color: rgba(113,62,253,0.2);
+        }
+        .work-item::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, transparent 40%, rgba(10,10,10,0.9) 100%);
+            z-index: 1;
+        }
+        .work-bg {
+            position: absolute;
+            inset: 0;
+            background-size: cover;
+            background-position: center;
+            transition: transform 0.8s cubic-bezier(0.19, 1, 0.22, 1);
+            filter: grayscale(0.3);
+        }
+        .work-item:hover .work-bg { transform: scale(1.05); }
+        .work-info {
+            position: relative;
+            z-index: 2;
+        }
+        .work-tag {
+            font-size: 0.6rem;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: var(--purple);
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        .work-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+        }
+
+        /* Numbers ticker */
+        .numbers {
+            padding: 80px 48px;
+            background: rgba(113,62,253,0.03);
+            border-top: 1px solid rgba(255,255,255,0.04);
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+        }
+        .numbers-grid {
+            display: flex;
+            justify-content: center;
+            gap: 120px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .number-item {
+            text-align: center;
+        }
+        .number-value {
+            font-size: 3.5rem;
+            font-weight: 700;
+            letter-spacing: -2px;
+            color: var(--text);
+            font-variant-numeric: tabular-nums;
+        }
+        .number-label {
+            font-size: 0.7rem;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-top: 8px;
+        }
+
+        /* Contact */
+        .contact {
+            flex-direction: column;
+            gap: 32px;
+            text-align: center;
+            padding: 120px 48px;
+        }
+        .contact-title {
+            font-size: clamp(2rem, 6vw, 5rem);
+            font-weight: 700;
+            letter-spacing: -2px;
+            line-height: 1;
+        }
+        .contact-title span {
+            background: linear-gradient(135deg, var(--purple), var(--red));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .contact-cta {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            padding: 18px 48px;
+            border: 1px solid rgba(113,62,253,0.4);
+            color: var(--text);
+            text-decoration: none;
+            font-size: 0.8rem;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            font-weight: 500;
+            transition: all 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        .contact-cta::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: var(--purple);
+            transform: translateY(100%);
+            transition: transform 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+            z-index: -1;
+        }
+        .contact-cta:hover::before { transform: translateY(0); }
+        .contact-cta:hover { border-color: var(--purple); }
+
+        /* Footer */
+        footer {
+            padding: 48px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid rgba(255,255,255,0.04);
+            position: relative;
+            z-index: 1;
+        }
+        footer span {
+            font-size: 0.7rem;
+            color: var(--muted);
+            letter-spacing: 1px;
+        }
+        footer a {
+            color: var(--muted);
+            text-decoration: none;
+            font-size: 0.7rem;
+            letter-spacing: 1px;
+            transition: color 0.3s;
+        }
+        footer a:hover { color: var(--purple); }
+
+        /* Reveal animations */
+        .reveal {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: opacity 0.8s cubic-bezier(0.19, 1, 0.22, 1), transform 0.8s cubic-bezier(0.19, 1, 0.22, 1);
+        }
+        .reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Magnetic elements */
+        .magnetic {
+            transition: transform 0.3s cubic-bezier(0.19, 1, 0.22, 1);
+        }
+
+        /* Mobile */
+        @media (max-width: 768px) {
+            body { cursor: auto; }
+            .cursor, .cursor-dot { display: none; }
+            nav { padding: 20px 24px; }
+            .nav-links { gap: 20px; }
+            .nav-links a { font-size: 0.65rem; letter-spacing: 2px; }
+            .services { padding: 80px 24px; }
+            .services-grid { grid-template-columns: 1fr; }
+            .work { padding: 80px 24px; }
+            .work-grid { grid-template-columns: 1fr; }
+            .numbers-grid { flex-direction: column; gap: 40px; align-items: center; }
+            .contact { padding: 80px 24px; }
+            footer { padding: 24px; flex-direction: column; gap: 12px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Custom cursor -->
+    <div class="cursor" id="cursor"></div>
+    <div class="cursor-dot" id="cursorDot"></div>
+
+    <!-- Particle canvas -->
+    <canvas id="bg-canvas"></canvas>
+
+    <!-- Navigation -->
+    <nav>
+        <a href="#" class="nav-logo magnetic">
+            <svg viewBox="0 0 4697 2593" fill="none" xmlns="http://www.w3.org/2000/svg" style="height:22px;">
+                <path d="M1352.95 778.448H1468.85V1794.05H1352.95V1332.81H840.038V1794.05H724.137V778.448H840.038V1223.85H1352.95V778.448Z" fill="#ECE0D7"/>
+                <path d="M2168.3 1281.64V1793.68H2055.34V1657.48C2029.22 1715.64 1947.91 1809.87 1798.52 1809.87C1666.43 1809.87 1556.42 1737.36 1556.42 1599.32C1556.42 1461.28 1650.61 1410.85 1847.83 1380.3C1986.91 1360.05 2055.34 1346.8 2055.34 1268.39C2055.34 1189.99 2008.98 1136.24 1910.38 1136.24C1790.06 1136.24 1737.81 1199.92 1730.82 1310.36H1620.44C1624.85 1165.32 1707.64 1044.95 1914.79 1044.95C2070.06 1044.95 2168.67 1123.36 2168.67 1281.64H2168.3ZM2053.51 1509.5V1407.9C2007.14 1432.57 1944.59 1448.39 1870.64 1463.12C1742.96 1487.78 1673.42 1515.39 1673.42 1598.21C1673.42 1681.04 1740.02 1715.64 1822.81 1715.64C1947.54 1715.64 2053.14 1608.15 2053.14 1509.5H2053.51Z" fill="#ECE0D7"/>
+                <path d="M2624.18 1067.04H2667.6V1162.75H2624.18C2502.39 1162.75 2382.07 1233.79 2382.07 1490.73V1794.05H2269.12V1067.04H2382.07V1188.88C2421.08 1081.4 2531.46 1067.04 2624.18 1067.04Z" fill="#ECE0D7"/>
+                <path d="M2978.87 1698.34H3063.13V1794.05H2957.16C2822.13 1794.05 2739.34 1708.28 2739.34 1566.19V1059.68L2695.93 875.259H2810.36L2853.77 1059.68H3032.22V1162.75H2853.77V1549.99C2853.77 1651.59 2894.25 1697.97 2978.5 1697.97L2978.87 1698.34Z" fill="#ECE0D7"/>
+                <path d="M3387.54 1044.95C3590.29 1044.95 3718.71 1167.89 3718.71 1408.99V1793.68H3605.76V1423.72C3605.76 1228.3 3520.04 1144.72 3376.28 1144.72C3222.48 1144.72 3110.27 1262.89 3110.27 1464.67V1793.68H2997.32V1067.04H3110.27V1207.23C3156.27 1100.85 3254.51 1044.95 3387.54 1044.95Z" fill="#ECE0D7"/>
+                <path d="M3785.23 1430.37C3785.23 1200.58 3945.13 1044.95 4150.83 1044.95C4356.53 1044.95 4512.84 1200.58 4512.84 1430.37C4512.84 1660.16 4356.53 1809.87 4150.83 1809.87C3945.13 1809.87 3785.23 1660.16 3785.23 1430.37ZM4397.72 1430.37C4397.72 1250.27 4305.37 1139.84 4150.83 1139.84C3996.29 1139.84 3900.35 1250.27 3900.35 1430.37C3900.35 1610.48 3996.29 1714.9 4150.83 1714.9C4305.37 1714.9 4397.72 1610.48 4397.72 1430.37Z" fill="#ECE0D7"/>
+            </svg>
+        </a>
+        <div class="nav-links">
+            <a href="#services" class="magnetic">Services</a>
+            <a href="#work" class="magnetic">Work</a>
+            <a href="#contact" class="magnetic">Contact</a>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <section class="hero" id="hero">
+        <div class="hero-badge reveal">Creative Technology Studio</div>
+        <h1 class="hero-title reveal">HLABS</h1>
+        <p class="hero-sub reveal">We build at the intersection of art, code, and blockchain. From generative systems to immersive experiences.</p>
+        <div class="hero-scroll">Scroll ↓</div>
+    </section>
+
+    <!-- Services -->
+    <section class="services" id="services">
+        <div class="section-label reveal">What We Do</div>
+        <div class="services-grid">
+            <div class="service-card reveal">
+                <div class="service-num">01</div>
+                <h3 class="service-title">Generative Art</h3>
+                <p class="service-desc">Custom generative systems, on-chain art, and algorithmic collections. From concept to deployment on any blockchain.</p>
+            </div>
+            <div class="service-card reveal">
+                <div class="service-num">02</div>
+                <h3 class="service-title">Creative Technology</h3>
+                <p class="service-desc">Interactive installations, real-time visuals, and hardware-software integrations using sensors, cameras, and AI.</p>
+            </div>
+            <div class="service-card reveal">
+                <div class="service-num">03</div>
+                <h3 class="service-title">Brand Experiences</h3>
+                <p class="service-desc">Digital identity systems, immersive web experiences, and creative direction for brands entering the digital art space.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Work -->
+    <section class="work" id="work">
+        <div class="section-label reveal">Selected Work</div>
+        <div class="work-grid">
+            <div class="work-item reveal">
+                <div class="work-bg" style="background:linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);"></div>
+                <div class="work-info">
+                    <div class="work-tag">Generative · Ordinals</div>
+                    <div class="work-title">Exquisite</div>
+                </div>
+            </div>
+            <div class="work-item reveal">
+                <div class="work-bg" style="background:linear-gradient(135deg, #0a0a0a 0%, #1a0a2e 50%, #2d1b69 100%);"></div>
+                <div class="work-info">
+                    <div class="work-tag">Installation · AI</div>
+                    <div class="work-title">SATS</div>
+                </div>
+            </div>
+            <div class="work-item reveal">
+                <div class="work-bg" style="background:linear-gradient(135deg, #1a0505 0%, #2d0a0a 50%, #4a1010 100%);"></div>
+                <div class="work-info">
+                    <div class="work-tag">Space · NASA</div>
+                    <div class="work-title">Rakia Mission</div>
+                </div>
+            </div>
+            <div class="work-item reveal">
+                <div class="work-bg" style="background:linear-gradient(135deg, #0a1a0a 0%, #0f2f0f 50%, #1a4a1a 100%);"></div>
+                <div class="work-info">
+                    <div class="work-tag">Generative · On-chain</div>
+                    <div class="work-title">The Paradox</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Numbers -->
+    <section class="numbers">
+        <div class="numbers-grid">
+            <div class="number-item reveal">
+                <div class="number-value" data-target="68">0</div>
+                <div class="number-label">K Audience</div>
+            </div>
+            <div class="number-item reveal">
+                <div class="number-value" data-target="12">0</div>
+                <div class="number-label">Collections</div>
+            </div>
+            <div class="number-item reveal">
+                <div class="number-value" data-target="5">0</div>
+                <div class="number-label">Countries</div>
+            </div>
+            <div class="number-item reveal">
+                <div class="number-value" data-target="1">0</div>
+                <div class="number-label">NFT in Space</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact -->
+    <section class="contact" id="contact">
+        <div class="section-label reveal">Let's Talk</div>
+        <h2 class="contact-title reveal">Have a project<br>in <span>mind</span>?</h2>
+        <a href="mailto:hello@harto.xyz" class="contact-cta magnetic reveal">
+            Get in touch →
+        </a>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <span>© 2026 HLABS — Harto Atelier SL</span>
+        <div style="display:flex;gap:32px;">
+            <a href="https://twitter.com/haborto" target="_blank" class="magnetic">Twitter</a>
+            <a href="https://instagram.com/harto.xyz" target="_blank" class="magnetic">Instagram</a>
+            <a href="https://harto.xyz" target="_blank" class="magnetic">harto.xyz</a>
+        </div>
+    </footer>
+
+    <script>
+        // ── Particle System ──
+        const canvas = document.getElementById('bg-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        let mouse = { x: -100, y: -100 };
+        let W, H;
+
+        function resize() {
+            W = canvas.width = window.innerWidth;
+            H = canvas.height = window.innerHeight;
+        }
+        resize();
+        window.addEventListener('resize', resize);
+
+        class Particle {
+            constructor() {
+                this.reset();
+            }
+            reset() {
+                this.x = Math.random() * W;
+                this.y = Math.random() * H;
+                this.size = Math.random() * 1.5 + 0.5;
+                this.speedX = (Math.random() - 0.5) * 0.3;
+                this.speedY = (Math.random() - 0.5) * 0.3;
+                this.opacity = Math.random() * 0.3 + 0.05;
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+
+                // Mouse repulsion
+                const dx = this.x - mouse.x;
+                const dy = this.y - mouse.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                if (dist < 120) {
+                    const force = (120 - dist) / 120;
+                    this.x += (dx / dist) * force * 2;
+                    this.y += (dy / dist) * force * 2;
+                }
+
+                if (this.x < 0 || this.x > W || this.y < 0 || this.y > H) this.reset();
+            }
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(113, 62, 253, ${this.opacity})`;
+                ctx.fill();
+            }
+        }
+
+        // Init particles
+        const count = Math.min(150, Math.floor((W * H) / 8000));
+        for (let i = 0; i < count; i++) particles.push(new Particle());
+
+        function drawConnections() {
+            for (let i = 0; i < particles.length; i++) {
+                for (let j = i + 1; j < particles.length; j++) {
+                    const dx = particles[i].x - particles[j].x;
+                    const dy = particles[i].y - particles[j].y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist < 100) {
+                        ctx.beginPath();
+                        ctx.moveTo(particles[i].x, particles[i].y);
+                        ctx.lineTo(particles[j].x, particles[j].y);
+                        ctx.strokeStyle = `rgba(113, 62, 253, ${0.06 * (1 - dist / 100)})`;
+                        ctx.lineWidth = 0.5;
+                        ctx.stroke();
+                    }
+                }
+            }
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, W, H);
+            particles.forEach(p => { p.update(); p.draw(); });
+            drawConnections();
+            requestAnimationFrame(animate);
+        }
+        animate();
+
+        document.addEventListener('mousemove', e => {
+            mouse.x = e.clientX;
+            mouse.y = e.clientY;
+        });
+
+        // ── Custom Cursor ──
+        const cursor = document.getElementById('cursor');
+        const cursorDot = document.getElementById('cursorDot');
+        let cursorX = 0, cursorY = 0, dotX = 0, dotY = 0;
+
+        document.addEventListener('mousemove', e => {
+            cursorX = e.clientX;
+            cursorY = e.clientY;
+        });
+
+        function updateCursor() {
+            dotX += (cursorX - dotX) * 0.15;
+            dotY += (cursorY - dotY) * 0.15;
+            cursor.style.left = dotX - 10 + 'px';
+            cursor.style.top = dotY - 10 + 'px';
+            cursorDot.style.left = cursorX - 2 + 'px';
+            cursorDot.style.top = cursorY - 2 + 'px';
+            requestAnimationFrame(updateCursor);
+        }
+        updateCursor();
+
+        // Hover effect
+        document.querySelectorAll('a, button, .service-card, .work-item, .magnetic').forEach(el => {
+            el.addEventListener('mouseenter', () => cursor.classList.add('hover'));
+            el.addEventListener('mouseleave', () => cursor.classList.remove('hover'));
+        });
+
+        // ── Magnetic effect ──
+        document.querySelectorAll('.magnetic').forEach(el => {
+            el.addEventListener('mousemove', e => {
+                const rect = el.getBoundingClientRect();
+                const x = e.clientX - rect.left - rect.width / 2;
+                const y = e.clientY - rect.top - rect.height / 2;
+                el.style.transform = `translate(${x * 0.2}px, ${y * 0.2}px)`;
+            });
+            el.addEventListener('mouseleave', () => {
+                el.style.transform = 'translate(0, 0)';
+            });
+        });
+
+        // ── Scroll reveal ──
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach((entry, i) => {
+                if (entry.isIntersecting) {
+                    setTimeout(() => entry.target.classList.add('visible'), i * 80);
+                }
+            });
+        }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+
+        document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+        // ── Number counter ──
+        const numObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const el = entry.target;
+                    const target = parseInt(el.dataset.target);
+                    let current = 0;
+                    const step = target / 40;
+                    const timer = setInterval(() => {
+                        current += step;
+                        if (current >= target) {
+                            current = target;
+                            clearInterval(timer);
+                        }
+                        el.textContent = Math.round(current);
+                    }, 30);
+                    numObserver.unobserve(el);
+                }
+            });
+        }, { threshold: 0.5 });
+
+        document.querySelectorAll('.number-value').forEach(el => numObserver.observe(el));
+
+        // ── Smooth scroll ──
+        document.querySelectorAll('a[href^="#"]').forEach(a => {
+            a.addEventListener('click', e => {
+                e.preventDefault();
+                const target = document.querySelector(a.getAttribute('href'));
+                if (target) target.scrollIntoView({ behavior: 'smooth' });
+            });
+        });
+    </script>
+
+</body>
+</html>
