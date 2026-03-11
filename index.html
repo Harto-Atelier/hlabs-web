@@ -105,8 +105,8 @@
         .work h2{font-size:clamp(2rem,5vw,4rem);font-weight:700;letter-spacing:-2px;margin-bottom:60px}
         .wg{display:grid;grid-template-columns:1fr 1fr;gap:3px}
         .wi{position:relative;aspect-ratio:16/10;overflow:hidden;background:#080808}
-        .wi canvas{width:100%;height:100%;display:block;transition:transform 1s cubic-bezier(.16,1,.3,1),filter .6s}
-        .wi:hover canvas{transform:scale(1.08);filter:brightness(1.3) saturate(1.2)}
+        .wi img,.wi canvas{width:100%;height:100%;object-fit:cover;display:block;transition:transform 1s cubic-bezier(.16,1,.3,1),filter .6s}
+        .wi:hover img,.wi:hover canvas{transform:scale(1.08);filter:brightness(1.3) saturate(1.2)}
         .wi .inf{position:absolute;bottom:0;left:0;right:0;padding:24px 28px;z-index:2;
             background:linear-gradient(transparent,rgba(5,5,5,.92));transform:translateY(100%);transition:transform .6s cubic-bezier(.16,1,.3,1)}
         .wi:hover .inf{transform:translateY(0)}
@@ -439,43 +439,24 @@ addEventListener('scroll',()=>{
 });
 
 // ═══════════════════════════════════════
-// GENERATIVE WORK THUMBNAILS
+// WORK GALLERY WITH REAL IMAGES
 // ═══════════════════════════════════════
 const works=[
-    {name:'Exquisite',type:'Generative · Ordinals',seed:42},
-    {name:'SATS',type:'Collection · Blockchain',seed:137},
-    {name:'Rakia Mission',type:'Space · NASA',seed:2022},
-    {name:'The Paradox',type:'Concept · On-chain',seed:888},
-    {name:'Floraforms',type:'Generative · Nature',seed:333},
-    {name:'MOAL+',type:'Museum · Acquisition',seed:6556},
+    {name:'Exquisite',type:'Generative · Ordinals',img:'work-exquisite.jpg',year:'2024'},
+    {name:'SATS',type:'Collection · Blockchain',img:'work-sats.jpg',year:'2023'},
+    {name:'Rakia Mission',type:'Space · NASA',img:'work-rakia.jpg',year:'2022'},
+    {name:'The Paradox',type:'Concept · On-chain',img:'work-paradox.jpg',year:'2024'},
+    {name:'Floraforms',type:'Generative · Nature',img:'work-floraforms.jpg',year:'2023'},
+    {name:'MOAL+',type:'Museum · Acquisition',img:'work-moal.jpg',year:'2023'},
 ];
 const wg=document.getElementById('wg');
 works.forEach(w=>{
     const div=document.createElement('div');div.className='wi';
-    const c=document.createElement('canvas');c.width=800;c.height=500;
-    const ctx=c.getContext('2d');
-    let s=w.seed;const rng=()=>{s=(s*16807)%2147483647;return(s-1)/2147483646};
-    ctx.fillStyle='#080808';ctx.fillRect(0,0,800,500);
-    const pals=[['#713EFD','#FB3100','#ECE0D7','#59B845'],['#ECE0D7','#713EFD','#FFD915'],['#FB3100','#59B845','#713EFD','#ECE0D7'],
-        ['#FFD915','#713EFD','#FB3100'],['#59B845','#ECE0D7','#713EFD'],['#713EFD','#FB3100','#FFD915','#ECE0D7']];
-    const pal=pals[w.seed%pals.length];
-    const gs=12,cw=800/gs,ch=500/gs;
-    for(let gx=0;gx<gs;gx++)for(let gy=0;gy<gs;gy++){
-        if(rng()>.5){
-            ctx.fillStyle=pal[Math.floor(rng()*pal.length)];
-            ctx.globalAlpha=rng()*.55+.15;
-            const x=gx*cw,y=gy*ch,t=rng();
-            if(t<.3){ctx.fillRect(x+rng()*cw*.15,y+rng()*ch*.15,cw*(rng()*.7+.25),ch*(rng()*.7+.25))}
-            else if(t<.55){ctx.beginPath();ctx.arc(x+cw/2,y+ch/2,Math.min(cw,ch)*(rng()*.4+.08),0,Math.PI*2);ctx.fill()}
-            else if(t<.75){ctx.strokeStyle=ctx.fillStyle;ctx.lineWidth=rng()*3+.5;
-                for(let l=0;l<5;l++){ctx.beginPath();ctx.moveTo(x+rng()*cw,y+rng()*ch);ctx.lineTo(x+rng()*cw,y+rng()*ch);ctx.stroke()}}
-            else{const sz=Math.min(cw,ch)*(rng()*.3+.1);ctx.save();ctx.translate(x+cw/2,y+ch/2);ctx.rotate(rng()*Math.PI);
-                ctx.fillRect(-sz/2,-sz/2,sz,sz);ctx.restore()}
-        }
-    }
-    ctx.globalAlpha=1;
-    div.appendChild(c);
-    div.innerHTML+=`<div class="inf"><div class="tp">${w.type}</div><div class="nm">${w.name}</div></div>`;
+    const img=document.createElement('img');
+    img.src=w.img;img.alt=w.name;img.loading='lazy';
+    img.style.cssText='width:100%;height:100%;object-fit:cover;display:block;transition:transform 1s cubic-bezier(.16,1,.3,1),filter .6s';
+    div.appendChild(img);
+    div.innerHTML+=`<div class="inf"><div class="tp">${w.type} · ${w.year}</div><div class="nm">${w.name}</div></div>`;
     wg.appendChild(div);
 });
 
