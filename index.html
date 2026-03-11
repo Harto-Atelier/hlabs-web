@@ -3,736 +3,1001 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HLABS — Creative Studio by Harto</title>
-    <meta name="description" content="HLABS is the creative technology studio by Harto. We build at the intersection of art, code, and blockchain.">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>◼</text></svg>">
+    <title>HLABS — Creative Technology Studio</title>
+    <meta name="description" content="HLABS is the creative technology studio by Harto. Art, code, blockchain. Barcelona.">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%23713EFD' width='100' height='100' rx='12'/></svg>">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
-
+        
         :root {
-            --bg: #0a0a0a;
-            --text: #ECE0D7;
-            --muted: rgba(236,224,215,0.4);
+            --bg: #060606;
+            --text: #e8e0d8;
+            --dim: rgba(232,224,216,0.35);
             --purple: #713EFD;
             --red: #FB3100;
-            --green: #59B845;
-            --yellow: #FFD915;
+        }
+
+        ::selection {
+            background: var(--purple);
+            color: var(--bg);
         }
 
         html {
-            scroll-behavior: smooth;
-            scrollbar-width: thin;
-            scrollbar-color: rgba(113,62,253,0.3) transparent;
+            scrollbar-width: none;
         }
+        html::-webkit-scrollbar { display: none; }
 
         body {
-            font-family: 'Inter', -apple-system, sans-serif;
+            font-family: 'Space Grotesk', sans-serif;
             background: var(--bg);
             color: var(--text);
             overflow-x: hidden;
             cursor: none;
         }
 
-        /* Custom cursor */
+        /* ── Grain overlay ── */
+        .grain {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            pointer-events: none;
+            opacity: 0.04;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+            background-repeat: repeat;
+            background-size: 128px;
+        }
+
+        /* ── Custom cursor ── */
         .cursor {
             position: fixed;
-            width: 20px;
-            height: 20px;
-            border: 1.5px solid var(--purple);
-            border-radius: 50%;
-            pointer-events: none;
-            z-index: 10000;
-            transition: transform 0.15s ease, opacity 0.15s ease;
-            mix-blend-mode: difference;
-        }
-        .cursor-dot {
-            position: fixed;
-            width: 4px;
-            height: 4px;
+            width: 12px;
+            height: 12px;
             background: var(--text);
             border-radius: 50%;
             pointer-events: none;
-            z-index: 10001;
+            z-index: 10000;
+            mix-blend-mode: difference;
+            transition: width 0.4s cubic-bezier(0.16,1,0.3,1), height 0.4s cubic-bezier(0.16,1,0.3,1);
         }
-        .cursor.hover {
-            transform: scale(2.5);
-            background: rgba(113,62,253,0.1);
+        .cursor.expand {
+            width: 80px;
+            height: 80px;
         }
 
-        /* Navigation */
+        /* ── Loader ── */
+        .loader {
+            position: fixed;
+            inset: 0;
+            z-index: 9998;
+            background: var(--bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.8s ease, visibility 0.8s ease;
+        }
+        .loader.done {
+            opacity: 0;
+            visibility: hidden;
+        }
+        .loader-bar {
+            width: 100px;
+            height: 1px;
+            background: rgba(255,255,255,0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        .loader-fill {
+            position: absolute;
+            height: 100%;
+            background: var(--purple);
+            width: 0;
+            transition: width 0.3s ease;
+        }
+        .loader-pct {
+            position: absolute;
+            top: 16px;
+            left: 0;
+            font-size: 0.65rem;
+            letter-spacing: 3px;
+            color: var(--dim);
+        }
+
+        /* ── Canvas BG ── */
+        #shader-bg {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+        }
+
+        /* ── Navigation ── */
         nav {
             position: fixed;
             top: 0;
             width: 100%;
-            padding: 28px 48px;
+            padding: 32px 48px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             z-index: 100;
             mix-blend-mode: difference;
         }
-        .nav-logo svg {
-            height: 22px;
-            width: auto;
-        }
-        .nav-links {
-            display: flex;
-            gap: 40px;
-        }
-        .nav-links a {
-            color: var(--text);
-            text-decoration: none;
+        .logo {
             font-size: 0.75rem;
-            letter-spacing: 3px;
-            text-transform: uppercase;
-            font-weight: 500;
-            transition: opacity 0.3s;
-            position: relative;
-        }
-        .nav-links a::after {
-            content: '';
-            position: absolute;
-            bottom: -4px;
-            left: 0;
-            width: 0;
-            height: 1px;
-            background: var(--purple);
-            transition: width 0.3s ease;
-        }
-        .nav-links a:hover::after { width: 100%; }
-        .nav-links a:hover { opacity: 1; }
-
-        /* Canvas background */
-        #bg-canvas {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            z-index: 0;
-        }
-
-        /* Sections */
-        section {
-            position: relative;
-            z-index: 1;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        /* Hero */
-        .hero {
-            flex-direction: column;
-            gap: 24px;
-            text-align: center;
-        }
-        .hero-badge {
-            font-size: 0.65rem;
-            letter-spacing: 6px;
-            text-transform: uppercase;
-            color: var(--purple);
-            font-weight: 600;
-        }
-        .hero-title {
-            font-size: clamp(3rem, 10vw, 9rem);
             font-weight: 700;
-            letter-spacing: -3px;
-            line-height: 0.9;
-            background: linear-gradient(135deg, var(--text) 0%, rgba(236,224,215,0.6) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        .hero-sub {
-            font-size: clamp(0.9rem, 1.5vw, 1.1rem);
-            color: var(--muted);
-            max-width: 500px;
-            line-height: 1.7;
-            font-weight: 300;
-        }
-        .hero-scroll {
-            position: absolute;
-            bottom: 48px;
-            font-size: 0.65rem;
             letter-spacing: 4px;
             text-transform: uppercase;
-            color: var(--muted);
-            animation: float 2s ease-in-out infinite;
         }
-        @keyframes float {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(8px); }
-        }
-
-        /* Services */
-        .services {
-            flex-direction: column;
-            padding: 120px 48px;
-            gap: 80px;
-        }
-        .section-label {
+        .logo span { color: var(--purple); }
+        .nav-time {
             font-size: 0.65rem;
-            letter-spacing: 6px;
-            text-transform: uppercase;
-            color: var(--purple);
-            font-weight: 600;
-        }
-        .services-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 2px;
-            max-width: 1200px;
-            width: 100%;
-        }
-        .service-card {
-            padding: 60px 40px;
-            background: rgba(255,255,255,0.02);
-            border: 1px solid rgba(255,255,255,0.04);
-            transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
-            position: relative;
-            overflow: hidden;
-        }
-        .service-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 2px;
-            background: var(--purple);
-            transform: scaleX(0);
-            transform-origin: left;
-            transition: transform 0.5s cubic-bezier(0.19, 1, 0.22, 1);
-        }
-        .service-card:hover::before { transform: scaleX(1); }
-        .service-card:hover {
-            background: rgba(113,62,253,0.04);
-            border-color: rgba(113,62,253,0.15);
-        }
-        .service-num {
-            font-size: 0.65rem;
-            color: var(--purple);
-            letter-spacing: 2px;
-            margin-bottom: 24px;
-            font-weight: 600;
-        }
-        .service-title {
-            font-size: 1.3rem;
-            font-weight: 600;
-            margin-bottom: 16px;
-            letter-spacing: -0.5px;
-        }
-        .service-desc {
-            font-size: 0.85rem;
-            color: var(--muted);
-            line-height: 1.7;
-            font-weight: 300;
-        }
-
-        /* Work section */
-        .work {
-            flex-direction: column;
-            padding: 120px 48px;
-            gap: 80px;
-        }
-        .work-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 2px;
-            max-width: 1200px;
-            width: 100%;
-        }
-        .work-item {
-            aspect-ratio: 16/10;
-            background: rgba(255,255,255,0.03);
-            border: 1px solid rgba(255,255,255,0.04);
-            position: relative;
-            overflow: hidden;
-            display: flex;
-            align-items: flex-end;
-            padding: 32px;
-            transition: all 0.6s cubic-bezier(0.19, 1, 0.22, 1);
-        }
-        .work-item:hover {
-            border-color: rgba(113,62,253,0.2);
-        }
-        .work-item::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(180deg, transparent 40%, rgba(10,10,10,0.9) 100%);
-            z-index: 1;
-        }
-        .work-bg {
-            position: absolute;
-            inset: 0;
-            background-size: cover;
-            background-position: center;
-            transition: transform 0.8s cubic-bezier(0.19, 1, 0.22, 1);
-            filter: grayscale(0.3);
-        }
-        .work-item:hover .work-bg { transform: scale(1.05); }
-        .work-info {
-            position: relative;
-            z-index: 2;
-        }
-        .work-tag {
-            font-size: 0.6rem;
-            letter-spacing: 3px;
-            text-transform: uppercase;
-            color: var(--purple);
-            font-weight: 600;
-            margin-bottom: 8px;
-        }
-        .work-title {
-            font-size: 1.4rem;
-            font-weight: 600;
-            letter-spacing: -0.5px;
-        }
-
-        /* Numbers ticker */
-        .numbers {
-            padding: 80px 48px;
-            background: rgba(113,62,253,0.03);
-            border-top: 1px solid rgba(255,255,255,0.04);
-            border-bottom: 1px solid rgba(255,255,255,0.04);
-        }
-        .numbers-grid {
-            display: flex;
-            justify-content: center;
-            gap: 120px;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        .number-item {
-            text-align: center;
-        }
-        .number-value {
-            font-size: 3.5rem;
-            font-weight: 700;
-            letter-spacing: -2px;
-            color: var(--text);
             font-variant-numeric: tabular-nums;
+            letter-spacing: 2px;
+            color: var(--dim);
         }
-        .number-label {
+        .nav-right {
+            display: flex;
+            gap: 48px;
+            align-items: center;
+        }
+        .nav-right a {
+            color: var(--text);
+            text-decoration: none;
             font-size: 0.7rem;
             letter-spacing: 3px;
             text-transform: uppercase;
-            color: var(--muted);
-            margin-top: 8px;
+            font-weight: 400;
+            position: relative;
+        }
+        .nav-right a::after {
+            content: '';
+            position: absolute;
+            bottom: -3px;
+            left: 0;
+            width: 0;
+            height: 1px;
+            background: var(--text);
+            transition: width 0.5s cubic-bezier(0.16,1,0.3,1);
+        }
+        .nav-right a:hover::after { width: 100%; }
+
+        /* ── Hero ── */
+        .hero {
+            position: relative;
+            z-index: 1;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 0 48px;
+        }
+        .hero-tag {
+            font-size: 0.6rem;
+            letter-spacing: 8px;
+            text-transform: uppercase;
+            color: var(--purple);
+            font-weight: 500;
+            margin-bottom: 24px;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeUp 0.8s 1.5s forwards;
+        }
+        .hero-title {
+            font-size: clamp(4rem, 12vw, 12rem);
+            font-weight: 700;
+            line-height: 0.85;
+            letter-spacing: -6px;
+            opacity: 0;
+            animation: fadeUp 1s 1.7s forwards;
+        }
+        .hero-title .outline {
+            -webkit-text-stroke: 1.5px var(--text);
+            -webkit-text-fill-color: transparent;
+        }
+        .hero-title .accent {
+            color: var(--purple);
+            font-style: italic;
+        }
+        .hero-bottom {
+            position: absolute;
+            bottom: 48px;
+            left: 48px;
+            right: 48px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            opacity: 0;
+            animation: fadeUp 0.8s 2.2s forwards;
+        }
+        .hero-desc {
+            max-width: 340px;
+            font-size: 0.82rem;
+            line-height: 1.7;
+            color: var(--dim);
+            font-weight: 300;
+        }
+        .hero-scroll {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+        .hero-scroll span {
+            font-size: 0.55rem;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: var(--dim);
+        }
+        .scroll-line {
+            width: 1px;
+            height: 40px;
+            background: rgba(255,255,255,0.15);
+            position: relative;
+            overflow: hidden;
+        }
+        .scroll-line::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 50%;
+            background: var(--purple);
+            animation: scrollPulse 1.5s ease-in-out infinite;
+        }
+        @keyframes scrollPulse {
+            0% { top: -50%; }
+            100% { top: 100%; }
+        }
+        @keyframes fadeUp {
+            to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Contact */
-        .contact {
-            flex-direction: column;
-            gap: 32px;
-            text-align: center;
-            padding: 120px 48px;
+        /* ── Marquee ── */
+        .marquee-section {
+            position: relative;
+            z-index: 1;
+            padding: 40px 0;
+            border-top: 1px solid rgba(255,255,255,0.04);
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+            overflow: hidden;
         }
-        .contact-title {
-            font-size: clamp(2rem, 6vw, 5rem);
+        .marquee-track {
+            display: flex;
+            animation: marqueeScroll 20s linear infinite;
+            width: max-content;
+        }
+        .marquee-track span {
+            font-size: clamp(1.5rem, 3vw, 2.5rem);
+            font-weight: 300;
+            letter-spacing: 2px;
+            white-space: nowrap;
+            padding: 0 40px;
+            color: var(--dim);
+        }
+        .marquee-track span strong {
+            color: var(--text);
+            font-weight: 600;
+        }
+        @keyframes marqueeScroll {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+
+        /* ── Services ── */
+        .services {
+            position: relative;
+            z-index: 1;
+            padding: 160px 48px;
+        }
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 80px;
+        }
+        .section-num {
+            font-size: 0.6rem;
+            letter-spacing: 4px;
+            color: var(--dim);
+        }
+        .section-title {
+            font-size: clamp(2rem, 5vw, 4.5rem);
             font-weight: 700;
             letter-spacing: -2px;
             line-height: 1;
         }
-        .contact-title span {
-            background: linear-gradient(135deg, var(--purple), var(--red));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+        .services-list {
+            border-top: 1px solid rgba(255,255,255,0.06);
         }
-        .contact-cta {
-            display: inline-flex;
+        .service-item {
+            display: grid;
+            grid-template-columns: 60px 1fr 1fr 120px;
             align-items: center;
-            gap: 12px;
-            padding: 18px 48px;
-            border: 1px solid rgba(113,62,253,0.4);
-            color: var(--text);
-            text-decoration: none;
-            font-size: 0.8rem;
-            letter-spacing: 3px;
-            text-transform: uppercase;
-            font-weight: 500;
-            transition: all 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+            padding: 36px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            transition: all 0.5s cubic-bezier(0.16,1,0.3,1);
+            position: relative;
+        }
+        .service-item::before {
+            content: '';
+            position: absolute;
+            left: -48px;
+            right: -48px;
+            top: 0;
+            bottom: 0;
+            background: rgba(113,62,253,0.03);
+            opacity: 0;
+            transition: opacity 0.5s;
+            z-index: -1;
+        }
+        .service-item:hover::before { opacity: 1; }
+        .service-item:hover { padding-left: 12px; }
+        .si-num {
+            font-size: 0.65rem;
+            color: var(--purple);
+            font-weight: 600;
+            letter-spacing: 2px;
+        }
+        .si-name {
+            font-size: clamp(1.2rem, 2.5vw, 2rem);
+            font-weight: 600;
+            letter-spacing: -0.5px;
+        }
+        .si-desc {
+            font-size: 0.82rem;
+            color: var(--dim);
+            line-height: 1.6;
+            font-weight: 300;
+            padding-right: 40px;
+        }
+        .si-arrow {
+            font-size: 1.2rem;
+            text-align: right;
+            opacity: 0;
+            transform: translateX(-10px);
+            transition: all 0.4s cubic-bezier(0.16,1,0.3,1);
+            color: var(--purple);
+        }
+        .service-item:hover .si-arrow {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        /* ── Work Showcase ── */
+        .work-section {
+            position: relative;
+            z-index: 1;
+            padding: 160px 0 160px 48px;
+        }
+        .work-scroll {
+            display: flex;
+            gap: 24px;
+            overflow-x: auto;
+            padding-right: 48px;
+            scrollbar-width: none;
+            cursor: grab;
+        }
+        .work-scroll::-webkit-scrollbar { display: none; }
+        .work-scroll:active { cursor: grabbing; }
+        .work-card {
+            flex-shrink: 0;
+            width: clamp(300px, 35vw, 500px);
             position: relative;
             overflow: hidden;
         }
-        .contact-cta::before {
-            content: '';
+        .work-visual {
+            width: 100%;
+            aspect-ratio: 3/4;
+            overflow: hidden;
+            position: relative;
+        }
+        .work-visual canvas {
+            width: 100%;
+            height: 100%;
+        }
+        .work-visual-bg {
             position: absolute;
             inset: 0;
-            background: var(--purple);
-            transform: translateY(100%);
-            transition: transform 0.4s cubic-bezier(0.19, 1, 0.22, 1);
-            z-index: -1;
+            transition: transform 1s cubic-bezier(0.16,1,0.3,1), filter 0.5s;
         }
-        .contact-cta:hover::before { transform: translateY(0); }
-        .contact-cta:hover { border-color: var(--purple); }
+        .work-card:hover .work-visual-bg {
+            transform: scale(1.08);
+        }
+        .work-meta {
+            padding: 20px 0;
+        }
+        .work-type {
+            font-size: 0.6rem;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: var(--purple);
+            font-weight: 500;
+            margin-bottom: 6px;
+        }
+        .work-name {
+            font-size: 1.4rem;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+        }
+        .work-year {
+            font-size: 0.7rem;
+            color: var(--dim);
+            margin-top: 4px;
+        }
 
-        /* Footer */
+        /* ── Manifesto ── */
+        .manifesto {
+            position: relative;
+            z-index: 1;
+            padding: 200px 48px;
+            display: flex;
+            justify-content: center;
+        }
+        .manifesto-text {
+            max-width: 800px;
+            font-size: clamp(1.5rem, 3.5vw, 3rem);
+            font-weight: 300;
+            line-height: 1.5;
+            letter-spacing: -1px;
+        }
+        .manifesto-text strong {
+            font-weight: 700;
+            color: var(--text);
+        }
+        .manifesto-text em {
+            color: var(--purple);
+            font-style: italic;
+        }
+        .m-word {
+            display: inline-block;
+            opacity: 0.15;
+            transition: opacity 0.5s;
+        }
+        .m-word.lit { opacity: 1; }
+
+        /* ── Contact ── */
+        .contact {
+            position: relative;
+            z-index: 1;
+            padding: 160px 48px;
+            text-align: center;
+        }
+        .contact-huge {
+            font-size: clamp(3rem, 10vw, 10rem);
+            font-weight: 700;
+            letter-spacing: -4px;
+            line-height: 0.9;
+            margin-bottom: 48px;
+        }
+        .contact-huge a {
+            color: var(--text);
+            text-decoration: none;
+            position: relative;
+            display: inline-block;
+        }
+        .contact-huge a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: var(--purple);
+            transform: scaleX(0);
+            transform-origin: right;
+            transition: transform 0.6s cubic-bezier(0.16,1,0.3,1);
+        }
+        .contact-huge a:hover::after {
+            transform: scaleX(1);
+            transform-origin: left;
+        }
+        .contact-sub {
+            font-size: 0.8rem;
+            color: var(--dim);
+            letter-spacing: 3px;
+            text-transform: uppercase;
+        }
+
+        /* ── Footer ── */
         footer {
-            padding: 48px;
+            position: relative;
+            z-index: 1;
+            padding: 32px 48px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             border-top: 1px solid rgba(255,255,255,0.04);
-            position: relative;
-            z-index: 1;
         }
-        footer span {
-            font-size: 0.7rem;
-            color: var(--muted);
-            letter-spacing: 1px;
-        }
-        footer a {
-            color: var(--muted);
+        footer span, footer a {
+            font-size: 0.65rem;
+            color: var(--dim);
+            letter-spacing: 2px;
             text-decoration: none;
-            font-size: 0.7rem;
-            letter-spacing: 1px;
-            transition: color 0.3s;
         }
-        footer a:hover { color: var(--purple); }
+        footer a:hover { color: var(--text); }
+        .footer-links { display: flex; gap: 32px; }
 
-        /* Reveal animations */
-        .reveal {
+        /* ── Reveal ── */
+        .rv {
             opacity: 0;
-            transform: translateY(40px);
-            transition: opacity 0.8s cubic-bezier(0.19, 1, 0.22, 1), transform 0.8s cubic-bezier(0.19, 1, 0.22, 1);
+            transform: translateY(50px);
+            transition: opacity 1s cubic-bezier(0.16,1,0.3,1), transform 1s cubic-bezier(0.16,1,0.3,1);
         }
-        .reveal.visible {
+        .rv.vis {
             opacity: 1;
             transform: translateY(0);
         }
 
-        /* Magnetic elements */
-        .magnetic {
-            transition: transform 0.3s cubic-bezier(0.19, 1, 0.22, 1);
-        }
-
-        /* Mobile */
+        /* ── Mobile ── */
         @media (max-width: 768px) {
             body { cursor: auto; }
-            .cursor, .cursor-dot { display: none; }
+            .cursor { display: none; }
             nav { padding: 20px 24px; }
-            .nav-links { gap: 20px; }
-            .nav-links a { font-size: 0.65rem; letter-spacing: 2px; }
-            .services { padding: 80px 24px; }
-            .services-grid { grid-template-columns: 1fr; }
-            .work { padding: 80px 24px; }
-            .work-grid { grid-template-columns: 1fr; }
-            .numbers-grid { flex-direction: column; gap: 40px; align-items: center; }
-            .contact { padding: 80px 24px; }
-            footer { padding: 24px; flex-direction: column; gap: 12px; }
+            .nav-right { gap: 20px; }
+            .nav-right a { font-size: 0.6rem; letter-spacing: 2px; }
+            .hero { padding: 0 24px; }
+            .hero-title { letter-spacing: -3px; }
+            .hero-bottom { left: 24px; right: 24px; }
+            .services { padding: 100px 24px; }
+            .service-item { grid-template-columns: 40px 1fr; gap: 8px; }
+            .si-desc, .si-arrow { display: none; }
+            .work-section { padding: 100px 0 100px 24px; }
+            .manifesto { padding: 100px 24px; }
+            .contact { padding: 100px 24px; }
+            footer { padding: 24px; flex-direction: column; gap: 16px; }
         }
     </style>
 </head>
 <body>
 
-    <!-- Custom cursor -->
+    <!-- Grain -->
+    <div class="grain"></div>
+
+    <!-- Cursor -->
     <div class="cursor" id="cursor"></div>
-    <div class="cursor-dot" id="cursorDot"></div>
 
-    <!-- Particle canvas -->
-    <canvas id="bg-canvas"></canvas>
+    <!-- Loader -->
+    <div class="loader" id="loader">
+        <div class="loader-bar">
+            <div class="loader-fill" id="loaderFill"></div>
+            <div class="loader-pct" id="loaderPct">000</div>
+        </div>
+    </div>
 
-    <!-- Navigation -->
+    <!-- Shader background -->
+    <canvas id="shader-bg"></canvas>
+
+    <!-- Nav -->
     <nav>
-        <a href="#" class="nav-logo magnetic">
-            <svg viewBox="0 0 4697 2593" fill="none" xmlns="http://www.w3.org/2000/svg" style="height:22px;">
-                <path d="M1352.95 778.448H1468.85V1794.05H1352.95V1332.81H840.038V1794.05H724.137V778.448H840.038V1223.85H1352.95V778.448Z" fill="#ECE0D7"/>
-                <path d="M2168.3 1281.64V1793.68H2055.34V1657.48C2029.22 1715.64 1947.91 1809.87 1798.52 1809.87C1666.43 1809.87 1556.42 1737.36 1556.42 1599.32C1556.42 1461.28 1650.61 1410.85 1847.83 1380.3C1986.91 1360.05 2055.34 1346.8 2055.34 1268.39C2055.34 1189.99 2008.98 1136.24 1910.38 1136.24C1790.06 1136.24 1737.81 1199.92 1730.82 1310.36H1620.44C1624.85 1165.32 1707.64 1044.95 1914.79 1044.95C2070.06 1044.95 2168.67 1123.36 2168.67 1281.64H2168.3ZM2053.51 1509.5V1407.9C2007.14 1432.57 1944.59 1448.39 1870.64 1463.12C1742.96 1487.78 1673.42 1515.39 1673.42 1598.21C1673.42 1681.04 1740.02 1715.64 1822.81 1715.64C1947.54 1715.64 2053.14 1608.15 2053.14 1509.5H2053.51Z" fill="#ECE0D7"/>
-                <path d="M2624.18 1067.04H2667.6V1162.75H2624.18C2502.39 1162.75 2382.07 1233.79 2382.07 1490.73V1794.05H2269.12V1067.04H2382.07V1188.88C2421.08 1081.4 2531.46 1067.04 2624.18 1067.04Z" fill="#ECE0D7"/>
-                <path d="M2978.87 1698.34H3063.13V1794.05H2957.16C2822.13 1794.05 2739.34 1708.28 2739.34 1566.19V1059.68L2695.93 875.259H2810.36L2853.77 1059.68H3032.22V1162.75H2853.77V1549.99C2853.77 1651.59 2894.25 1697.97 2978.5 1697.97L2978.87 1698.34Z" fill="#ECE0D7"/>
-                <path d="M3387.54 1044.95C3590.29 1044.95 3718.71 1167.89 3718.71 1408.99V1793.68H3605.76V1423.72C3605.76 1228.3 3520.04 1144.72 3376.28 1144.72C3222.48 1144.72 3110.27 1262.89 3110.27 1464.67V1793.68H2997.32V1067.04H3110.27V1207.23C3156.27 1100.85 3254.51 1044.95 3387.54 1044.95Z" fill="#ECE0D7"/>
-                <path d="M3785.23 1430.37C3785.23 1200.58 3945.13 1044.95 4150.83 1044.95C4356.53 1044.95 4512.84 1200.58 4512.84 1430.37C4512.84 1660.16 4356.53 1809.87 4150.83 1809.87C3945.13 1809.87 3785.23 1660.16 3785.23 1430.37ZM4397.72 1430.37C4397.72 1250.27 4305.37 1139.84 4150.83 1139.84C3996.29 1139.84 3900.35 1250.27 3900.35 1430.37C3900.35 1610.48 3996.29 1714.9 4150.83 1714.9C4305.37 1714.9 4397.72 1610.48 4397.72 1430.37Z" fill="#ECE0D7"/>
-            </svg>
-        </a>
-        <div class="nav-links">
-            <a href="#services" class="magnetic">Services</a>
-            <a href="#work" class="magnetic">Work</a>
-            <a href="#contact" class="magnetic">Contact</a>
+        <div class="logo">H<span>.</span>LABS</div>
+        <div class="nav-right">
+            <span class="nav-time" id="navTime"></span>
+            <a href="#work">Work</a>
+            <a href="#contact">Contact</a>
         </div>
     </nav>
 
     <!-- Hero -->
-    <section class="hero" id="hero">
-        <div class="hero-badge reveal">Creative Technology Studio</div>
-        <h1 class="hero-title reveal">HLABS</h1>
-        <p class="hero-sub reveal">We build at the intersection of art, code, and blockchain. From generative systems to immersive experiences.</p>
-        <div class="hero-scroll">Scroll ↓</div>
+    <section class="hero">
+        <div class="hero-tag">Creative Technology Studio — BCN</div>
+        <h1 class="hero-title">
+            <span class="outline">We build</span><br>
+            <span class="accent">experiences</span>
+        </h1>
+        <div class="hero-bottom">
+            <p class="hero-desc">Art, code, and blockchain converge in our Barcelona studio. We create what doesn't exist yet.</p>
+            <div class="hero-scroll">
+                <span>Scroll</span>
+                <div class="scroll-line"></div>
+            </div>
+        </div>
     </section>
 
+    <!-- Marquee -->
+    <div class="marquee-section">
+        <div class="marquee-track">
+            <span><strong>Generative Art</strong> — Creative Technology — <strong>Brand Experiences</strong> — On-chain Systems — <strong>Interactive Installations</strong> — AI Integration — <strong>Blockchain</strong> — Immersive Web —</span>
+            <span><strong>Generative Art</strong> — Creative Technology — <strong>Brand Experiences</strong> — On-chain Systems — <strong>Interactive Installations</strong> — AI Integration — <strong>Blockchain</strong> — Immersive Web —</span>
+        </div>
+    </div>
+
     <!-- Services -->
-    <section class="services" id="services">
-        <div class="section-label reveal">What We Do</div>
-        <div class="services-grid">
-            <div class="service-card reveal">
-                <div class="service-num">01</div>
-                <h3 class="service-title">Generative Art</h3>
-                <p class="service-desc">Custom generative systems, on-chain art, and algorithmic collections. From concept to deployment on any blockchain.</p>
+    <section class="services">
+        <div class="section-header rv">
+            <span class="section-num">(01)</span>
+            <h2 class="section-title">Services</h2>
+        </div>
+        <div class="services-list">
+            <div class="service-item rv">
+                <span class="si-num">01</span>
+                <h3 class="si-name">Generative Art</h3>
+                <p class="si-desc">Custom algorithmic systems. On-chain collections. From concept to deployment on any blockchain.</p>
+                <span class="si-arrow">→</span>
             </div>
-            <div class="service-card reveal">
-                <div class="service-num">02</div>
-                <h3 class="service-title">Creative Technology</h3>
-                <p class="service-desc">Interactive installations, real-time visuals, and hardware-software integrations using sensors, cameras, and AI.</p>
+            <div class="service-item rv">
+                <span class="si-num">02</span>
+                <h3 class="si-name">Creative Technology</h3>
+                <p class="si-desc">Real-time visuals, hardware integrations. Sensors, cameras, AI, and everything in between.</p>
+                <span class="si-arrow">→</span>
             </div>
-            <div class="service-card reveal">
-                <div class="service-num">03</div>
-                <h3 class="service-title">Brand Experiences</h3>
-                <p class="service-desc">Digital identity systems, immersive web experiences, and creative direction for brands entering the digital art space.</p>
+            <div class="service-item rv">
+                <span class="si-num">03</span>
+                <h3 class="si-name">Brand Experiences</h3>
+                <p class="si-desc">Immersive web, digital identity systems, and creative direction for the blockchain era.</p>
+                <span class="si-arrow">→</span>
+            </div>
+            <div class="service-item rv">
+                <span class="si-num">04</span>
+                <h3 class="si-name">Installations</h3>
+                <p class="si-desc">Physical-digital works. Interactive pieces for galleries, museums, and public spaces.</p>
+                <span class="si-arrow">→</span>
             </div>
         </div>
     </section>
 
     <!-- Work -->
-    <section class="work" id="work">
-        <div class="section-label reveal">Selected Work</div>
-        <div class="work-grid">
-            <div class="work-item reveal">
-                <div class="work-bg" style="background:linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);"></div>
-                <div class="work-info">
-                    <div class="work-tag">Generative · Ordinals</div>
-                    <div class="work-title">Exquisite</div>
+    <section class="work-section" id="work">
+        <div class="section-header rv" style="padding-right:48px;">
+            <span class="section-num">(02)</span>
+            <h2 class="section-title">Selected Work</h2>
+        </div>
+        <div class="work-scroll" id="workScroll">
+            <div class="work-card">
+                <div class="work-visual"><div class="work-visual-bg" id="genCanvas1"></div></div>
+                <div class="work-meta">
+                    <div class="work-type">Generative · Ordinals</div>
+                    <div class="work-name">Exquisite</div>
+                    <div class="work-year">2024</div>
                 </div>
             </div>
-            <div class="work-item reveal">
-                <div class="work-bg" style="background:linear-gradient(135deg, #0a0a0a 0%, #1a0a2e 50%, #2d1b69 100%);"></div>
-                <div class="work-info">
-                    <div class="work-tag">Installation · AI</div>
-                    <div class="work-title">SATS</div>
+            <div class="work-card">
+                <div class="work-visual"><div class="work-visual-bg" id="genCanvas2"></div></div>
+                <div class="work-meta">
+                    <div class="work-type">Collection · Blockchain</div>
+                    <div class="work-name">SATS</div>
+                    <div class="work-year">2023</div>
                 </div>
             </div>
-            <div class="work-item reveal">
-                <div class="work-bg" style="background:linear-gradient(135deg, #1a0505 0%, #2d0a0a 50%, #4a1010 100%);"></div>
-                <div class="work-info">
-                    <div class="work-tag">Space · NASA</div>
-                    <div class="work-title">Rakia Mission</div>
+            <div class="work-card">
+                <div class="work-visual"><div class="work-visual-bg" id="genCanvas3"></div></div>
+                <div class="work-meta">
+                    <div class="work-type">Space · NASA / SpaceX</div>
+                    <div class="work-name">Rakia Mission</div>
+                    <div class="work-year">2022</div>
                 </div>
             </div>
-            <div class="work-item reveal">
-                <div class="work-bg" style="background:linear-gradient(135deg, #0a1a0a 0%, #0f2f0f 50%, #1a4a1a 100%);"></div>
-                <div class="work-info">
-                    <div class="work-tag">Generative · On-chain</div>
-                    <div class="work-title">The Paradox</div>
+            <div class="work-card">
+                <div class="work-visual"><div class="work-visual-bg" id="genCanvas4"></div></div>
+                <div class="work-meta">
+                    <div class="work-type">Concept · On-chain</div>
+                    <div class="work-name">The Paradox</div>
+                    <div class="work-year">2024</div>
+                </div>
+            </div>
+            <div class="work-card">
+                <div class="work-visual"><div class="work-visual-bg" id="genCanvas5"></div></div>
+                <div class="work-meta">
+                    <div class="work-type">Generative · Museum</div>
+                    <div class="work-name">MOAL+</div>
+                    <div class="work-year">2023</div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Numbers -->
-    <section class="numbers">
-        <div class="numbers-grid">
-            <div class="number-item reveal">
-                <div class="number-value" data-target="68">0</div>
-                <div class="number-label">K Audience</div>
-            </div>
-            <div class="number-item reveal">
-                <div class="number-value" data-target="12">0</div>
-                <div class="number-label">Collections</div>
-            </div>
-            <div class="number-item reveal">
-                <div class="number-value" data-target="5">0</div>
-                <div class="number-label">Countries</div>
-            </div>
-            <div class="number-item reveal">
-                <div class="number-value" data-target="1">0</div>
-                <div class="number-label">NFT in Space</div>
-            </div>
-        </div>
+    <!-- Manifesto -->
+    <section class="manifesto">
+        <p class="manifesto-text" id="manifesto">
+            <strong>Every artist was first an amateur.</strong> We don't chase trends. We build <em>systems</em> that create. Machines that think. Code that <em>feels.</em> Our work lives on blockchains, in galleries, in <em>space.</em> We believe technology should serve the artist, not replace them.
+        </p>
     </section>
 
     <!-- Contact -->
     <section class="contact" id="contact">
-        <div class="section-label reveal">Let's Talk</div>
-        <h2 class="contact-title reveal">Have a project<br>in <span>mind</span>?</h2>
-        <a href="mailto:hello@harto.xyz" class="contact-cta magnetic reveal">
-            Get in touch →
-        </a>
+        <div class="contact-sub rv">New project?</div>
+        <div class="contact-huge rv">
+            <a href="mailto:hello@harto.xyz">Let's talk</a>
+        </div>
+        <div class="contact-sub rv">hello@harto.xyz</div>
     </section>
 
     <!-- Footer -->
     <footer>
-        <span>© 2026 HLABS — Harto Atelier SL</span>
-        <div style="display:flex;gap:32px;">
-            <a href="https://twitter.com/haborto" target="_blank" class="magnetic">Twitter</a>
-            <a href="https://instagram.com/harto.xyz" target="_blank" class="magnetic">Instagram</a>
-            <a href="https://harto.xyz" target="_blank" class="magnetic">harto.xyz</a>
+        <span>© 2026 HLABS — Harto Atelier SL — Barcelona</span>
+        <div class="footer-links">
+            <a href="https://twitter.com/haborto" target="_blank">Twitter</a>
+            <a href="https://instagram.com/harto.xyz" target="_blank">Instagram</a>
+            <a href="https://harto.xyz" target="_blank">harto.xyz</a>
         </div>
     </footer>
 
     <script>
-        // ── Particle System ──
-        const canvas = document.getElementById('bg-canvas');
-        const ctx = canvas.getContext('2d');
-        let particles = [];
-        let mouse = { x: -100, y: -100 };
-        let W, H;
+    // ── Loader ──
+    let loadPct = 0;
+    const loaderFill = document.getElementById('loaderFill');
+    const loaderPct = document.getElementById('loaderPct');
+    const loader = document.getElementById('loader');
 
-        function resize() {
-            W = canvas.width = window.innerWidth;
-            H = canvas.height = window.innerHeight;
+    function updateLoader() {
+        loadPct += Math.random() * 15 + 5;
+        if (loadPct >= 100) {
+            loadPct = 100;
+            loaderFill.style.width = '100%';
+            loaderPct.textContent = '100';
+            setTimeout(() => loader.classList.add('done'), 300);
+            return;
         }
-        resize();
-        window.addEventListener('resize', resize);
+        loaderFill.style.width = loadPct + '%';
+        loaderPct.textContent = String(Math.floor(loadPct)).padStart(3, '0');
+        setTimeout(updateLoader, 80 + Math.random() * 120);
+    }
+    updateLoader();
 
-        class Particle {
-            constructor() {
-                this.reset();
-            }
-            reset() {
-                this.x = Math.random() * W;
-                this.y = Math.random() * H;
-                this.size = Math.random() * 1.5 + 0.5;
-                this.speedX = (Math.random() - 0.5) * 0.3;
-                this.speedY = (Math.random() - 0.5) * 0.3;
-                this.opacity = Math.random() * 0.3 + 0.05;
-            }
-            update() {
-                this.x += this.speedX;
-                this.y += this.speedY;
+    // ── Shader Background ──
+    const canvas = document.getElementById('shader-bg');
+    const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
 
-                // Mouse repulsion
-                const dx = this.x - mouse.x;
-                const dy = this.y - mouse.y;
-                const dist = Math.sqrt(dx * dx + dy * dy);
-                if (dist < 120) {
-                    const force = (120 - dist) / 120;
-                    this.x += (dx / dist) * force * 2;
-                    this.y += (dy / dist) * force * 2;
-                }
+    function resizeCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        if (gl) gl.viewport(0, 0, canvas.width, canvas.height);
+    }
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
 
-                if (this.x < 0 || this.x > W || this.y < 0 || this.y > H) this.reset();
-            }
-            draw() {
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                ctx.fillStyle = `rgba(113, 62, 253, ${this.opacity})`;
-                ctx.fill();
-            }
+    if (gl) {
+        const vs = `attribute vec2 p;void main(){gl_Position=vec4(p,0,1);}`;
+        const fs = `
+        precision mediump float;
+        uniform float t;
+        uniform vec2 r;
+        uniform vec2 m;
+        
+        float noise(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
+        
+        float fbm(vec2 p){
+            float v=0.,a=.5;
+            for(int i=0;i<5;i++){v+=a*noise(p);p=p*2.+vec2(1.7,9.2);a*=.5;}
+            return v;
+        }
+        
+        void main(){
+            vec2 uv=gl_FragCoord.xy/r;
+            vec2 mp=m/r;
+            
+            float d=length(uv-mp)*1.5;
+            float glow=.015/(.01+d*d);
+            
+            float n=fbm(uv*3.+t*.08);
+            float n2=fbm(uv*5.-t*.12+mp*2.);
+            
+            vec3 col=vec3(.024,.024,.024);
+            col+=vec3(.44,.24,.99)*glow*.3;
+            col+=vec3(.44,.24,.99)*n*.02;
+            col+=vec3(.98,.19,.0)*n2*.008;
+            
+            col+=vec3(noise(uv*500.+t))*.015;
+            
+            gl_FragColor=vec4(col,1);
+        }`;
+
+        function compileShader(src, type) {
+            const s = gl.createShader(type);
+            gl.shaderSource(s, src);
+            gl.compileShader(s);
+            return s;
         }
 
-        // Init particles
-        const count = Math.min(150, Math.floor((W * H) / 8000));
-        for (let i = 0; i < count; i++) particles.push(new Particle());
+        const prog = gl.createProgram();
+        gl.attachShader(prog, compileShader(vs, gl.VERTEX_SHADER));
+        gl.attachShader(prog, compileShader(fs, gl.FRAGMENT_SHADER));
+        gl.linkProgram(prog);
+        gl.useProgram(prog);
 
-        function drawConnections() {
-            for (let i = 0; i < particles.length; i++) {
-                for (let j = i + 1; j < particles.length; j++) {
-                    const dx = particles[i].x - particles[j].x;
-                    const dy = particles[i].y - particles[j].y;
-                    const dist = Math.sqrt(dx * dx + dy * dy);
-                    if (dist < 100) {
+        const buf = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1,1,-1,-1,1,1,1]), gl.STATIC_DRAW);
+        const pLoc = gl.getAttribLocation(prog, 'p');
+        gl.enableVertexAttribArray(pLoc);
+        gl.vertexAttribPointer(pLoc, 2, gl.FLOAT, false, 0, 0);
+
+        const tLoc = gl.getUniformLocation(prog, 't');
+        const rLoc = gl.getUniformLocation(prog, 'r');
+        const mLoc = gl.getUniformLocation(prog, 'm');
+
+        let mx = 0, my = 0;
+        document.addEventListener('mousemove', e => { mx = e.clientX; my = canvas.height - e.clientY; });
+
+        function renderGL() {
+            gl.uniform1f(tLoc, performance.now() * 0.001);
+            gl.uniform2f(rLoc, canvas.width, canvas.height);
+            gl.uniform2f(mLoc, mx, my);
+            gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+            requestAnimationFrame(renderGL);
+        }
+        renderGL();
+    }
+
+    // ── Cursor ──
+    const cursorEl = document.getElementById('cursor');
+    let cx = 0, cy = 0, dx = 0, dy = 0;
+
+    document.addEventListener('mousemove', e => { cx = e.clientX; cy = e.clientY; });
+
+    function moveCursor() {
+        dx += (cx - dx) * 0.12;
+        dy += (cy - dy) * 0.12;
+        cursorEl.style.left = dx - 6 + 'px';
+        cursorEl.style.top = dy - 6 + 'px';
+        requestAnimationFrame(moveCursor);
+    }
+    moveCursor();
+
+    document.querySelectorAll('a, .service-item, .work-card, .contact-huge').forEach(el => {
+        el.addEventListener('mouseenter', () => cursorEl.classList.add('expand'));
+        el.addEventListener('mouseleave', () => cursorEl.classList.remove('expand'));
+    });
+
+    // ── Nav time ──
+    function updateTime() {
+        const now = new Date();
+        document.getElementById('navTime').textContent =
+            now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'Europe/Madrid' }) + ' BCN';
+        requestAnimationFrame(updateTime);
+    }
+    updateTime();
+
+    // ── Generative art for work cards ──
+    function genArt(id, seed) {
+        const el = document.getElementById(id);
+        if (!el) return;
+        const c = document.createElement('canvas');
+        c.width = 500; c.height = 667;
+        const ctx = c.getContext('2d');
+        
+        // Seeded random
+        let s = seed;
+        const rng = () => { s = (s * 16807) % 2147483647; return (s - 1) / 2147483646; };
+        
+        // Dark background
+        ctx.fillStyle = '#0a0a0a';
+        ctx.fillRect(0, 0, 500, 667);
+        
+        // Generate based on seed
+        const colors = [
+            ['#713EFD', '#FB3100', '#ECE0D7'],
+            ['#ECE0D7', '#713EFD', '#59B845'],
+            ['#FB3100', '#FFD915', '#ECE0D7'],
+            ['#59B845', '#713EFD', '#FB3100'],
+            ['#713EFD', '#ECE0D7', '#FFD915'],
+        ];
+        const palette = colors[seed % colors.length];
+        
+        // Grid-based generative (Harto style: 8x8 blocks)
+        const gridSize = 8;
+        const cellW = 500 / gridSize;
+        const cellH = 667 / gridSize;
+        
+        for (let gx = 0; gx < gridSize; gx++) {
+            for (let gy = 0; gy < gridSize; gy++) {
+                if (rng() > 0.6) {
+                    const color = palette[Math.floor(rng() * palette.length)];
+                    ctx.fillStyle = color;
+                    ctx.globalAlpha = rng() * 0.4 + 0.1;
+                    
+                    const type = rng();
+                    const x = gx * cellW;
+                    const y = gy * cellH;
+                    
+                    if (type < 0.3) {
+                        // Rectangle
+                        const w = cellW * (rng() * 0.8 + 0.2);
+                        const h = cellH * (rng() * 0.8 + 0.2);
+                        ctx.fillRect(x + (cellW - w) / 2, y + (cellH - h) / 2, w, h);
+                    } else if (type < 0.6) {
+                        // Circle
+                        const r = Math.min(cellW, cellH) * (rng() * 0.3 + 0.1);
                         ctx.beginPath();
-                        ctx.moveTo(particles[i].x, particles[i].y);
-                        ctx.lineTo(particles[j].x, particles[j].y);
-                        ctx.strokeStyle = `rgba(113, 62, 253, ${0.06 * (1 - dist / 100)})`;
-                        ctx.lineWidth = 0.5;
-                        ctx.stroke();
+                        ctx.arc(x + cellW / 2, y + cellH / 2, r, 0, Math.PI * 2);
+                        ctx.fill();
+                    } else {
+                        // Line cluster
+                        ctx.strokeStyle = color;
+                        ctx.lineWidth = rng() * 2 + 0.5;
+                        for (let l = 0; l < 3; l++) {
+                            ctx.beginPath();
+                            ctx.moveTo(x + rng() * cellW, y + rng() * cellH);
+                            ctx.lineTo(x + rng() * cellW, y + rng() * cellH);
+                            ctx.stroke();
+                        }
                     }
                 }
             }
         }
+        ctx.globalAlpha = 1;
+        
+        el.style.backgroundImage = `url(${c.toDataURL()})`;
+        el.style.backgroundSize = 'cover';
+        el.style.backgroundPosition = 'center';
+    }
 
-        function animate() {
-            ctx.clearRect(0, 0, W, H);
-            particles.forEach(p => { p.update(); p.draw(); });
-            drawConnections();
-            requestAnimationFrame(animate);
+    genArt('genCanvas1', 42);
+    genArt('genCanvas2', 137);
+    genArt('genCanvas3', 2022);
+    genArt('genCanvas4', 888);
+    genArt('genCanvas5', 6556);
+
+    // ── Horizontal drag scroll ──
+    const scrollEl = document.getElementById('workScroll');
+    let isDown = false, startX, scrollLeft;
+    scrollEl.addEventListener('mousedown', e => {
+        isDown = true;
+        startX = e.pageX - scrollEl.offsetLeft;
+        scrollLeft = scrollEl.scrollLeft;
+    });
+    scrollEl.addEventListener('mouseleave', () => isDown = false);
+    scrollEl.addEventListener('mouseup', () => isDown = false);
+    scrollEl.addEventListener('mousemove', e => {
+        if (!isDown) return;
+        e.preventDefault();
+        const x = e.pageX - scrollEl.offsetLeft;
+        scrollEl.scrollLeft = scrollLeft - (x - startX) * 1.5;
+    });
+
+    // ── Manifesto word reveal ──
+    const manifesto = document.getElementById('manifesto');
+    const rawHTML = manifesto.innerHTML;
+    // Wrap each word in a span while preserving HTML tags
+    const words = [];
+    let wordHTML = '';
+    let inTag = false;
+    for (let i = 0; i < rawHTML.length; i++) {
+        const ch = rawHTML[i];
+        if (ch === '<') { inTag = true; wordHTML += ch; continue; }
+        if (ch === '>') { inTag = false; wordHTML += ch; continue; }
+        if (inTag) { wordHTML += ch; continue; }
+        if (ch === ' ' || ch === '\n') {
+            if (wordHTML.trim()) {
+                words.push(wordHTML);
+                wordHTML = '';
+            }
+        } else {
+            wordHTML += ch;
         }
-        animate();
+    }
+    if (wordHTML.trim()) words.push(wordHTML);
+    
+    manifesto.innerHTML = words.map(w => `<span class="m-word">${w}</span>`).join(' ');
+    const mWords = manifesto.querySelectorAll('.m-word');
 
-        document.addEventListener('mousemove', e => {
-            mouse.x = e.clientX;
-            mouse.y = e.clientY;
+    function updateManifesto() {
+        const rect = manifesto.getBoundingClientRect();
+        const viewH = window.innerHeight;
+        const progress = 1 - (rect.top / (viewH * 0.6));
+        const litCount = Math.floor(progress * mWords.length);
+        mWords.forEach((w, i) => {
+            w.classList.toggle('lit', i < litCount);
         });
+    }
+    window.addEventListener('scroll', updateManifesto);
 
-        // ── Custom Cursor ──
-        const cursor = document.getElementById('cursor');
-        const cursorDot = document.getElementById('cursorDot');
-        let cursorX = 0, cursorY = 0, dotX = 0, dotY = 0;
-
-        document.addEventListener('mousemove', e => {
-            cursorX = e.clientX;
-            cursorY = e.clientY;
+    // ── Reveal on scroll ──
+    const rvObs = new IntersectionObserver((entries) => {
+        entries.forEach((e, i) => {
+            if (e.isIntersecting) {
+                setTimeout(() => e.target.classList.add('vis'), i * 100);
+            }
         });
+    }, { threshold: 0.1 });
+    document.querySelectorAll('.rv').forEach(el => rvObs.observe(el));
 
-        function updateCursor() {
-            dotX += (cursorX - dotX) * 0.15;
-            dotY += (cursorY - dotY) * 0.15;
-            cursor.style.left = dotX - 10 + 'px';
-            cursor.style.top = dotY - 10 + 'px';
-            cursorDot.style.left = cursorX - 2 + 'px';
-            cursorDot.style.top = cursorY - 2 + 'px';
-            requestAnimationFrame(updateCursor);
-        }
-        updateCursor();
-
-        // Hover effect
-        document.querySelectorAll('a, button, .service-card, .work-item, .magnetic').forEach(el => {
-            el.addEventListener('mouseenter', () => cursor.classList.add('hover'));
-            el.addEventListener('mouseleave', () => cursor.classList.remove('hover'));
+    // ── Smooth anchor scroll ──
+    document.querySelectorAll('a[href^="#"]').forEach(a => {
+        a.addEventListener('click', e => {
+            e.preventDefault();
+            document.querySelector(a.getAttribute('href'))?.scrollIntoView({ behavior: 'smooth' });
         });
-
-        // ── Magnetic effect ──
-        document.querySelectorAll('.magnetic').forEach(el => {
-            el.addEventListener('mousemove', e => {
-                const rect = el.getBoundingClientRect();
-                const x = e.clientX - rect.left - rect.width / 2;
-                const y = e.clientY - rect.top - rect.height / 2;
-                el.style.transform = `translate(${x * 0.2}px, ${y * 0.2}px)`;
-            });
-            el.addEventListener('mouseleave', () => {
-                el.style.transform = 'translate(0, 0)';
-            });
-        });
-
-        // ── Scroll reveal ──
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach((entry, i) => {
-                if (entry.isIntersecting) {
-                    setTimeout(() => entry.target.classList.add('visible'), i * 80);
-                }
-            });
-        }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
-
-        document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
-
-        // ── Number counter ──
-        const numObserver = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    const el = entry.target;
-                    const target = parseInt(el.dataset.target);
-                    let current = 0;
-                    const step = target / 40;
-                    const timer = setInterval(() => {
-                        current += step;
-                        if (current >= target) {
-                            current = target;
-                            clearInterval(timer);
-                        }
-                        el.textContent = Math.round(current);
-                    }, 30);
-                    numObserver.unobserve(el);
-                }
-            });
-        }, { threshold: 0.5 });
-
-        document.querySelectorAll('.number-value').forEach(el => numObserver.observe(el));
-
-        // ── Smooth scroll ──
-        document.querySelectorAll('a[href^="#"]').forEach(a => {
-            a.addEventListener('click', e => {
-                e.preventDefault();
-                const target = document.querySelector(a.getAttribute('href'));
-                if (target) target.scrollIntoView({ behavior: 'smooth' });
-            });
-        });
+    });
     </script>
-
 </body>
 </html>
